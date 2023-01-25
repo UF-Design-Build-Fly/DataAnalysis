@@ -62,10 +62,12 @@ markerSize = 10;
 colormap("jet")
 
 scatter3(throttle, airspeed, current.*voltage, markerSize, [time; 0], 'filled'); %this chart shows how power input falls as airspeed increases. This is because the propeller is no longer able to output significant thrust as it is rpm limited, so angle of attack is approaching zero.
-xlabel("throttle")
-ylabel("airspeed")
-zlabel("power")
-colorbar
+xlabel("Throttle");
+ylabel("Airspeed");
+zlabel("Power Input");
+title("Dynamic Thrust Relationship Colored by Timestamp of Data Point");
+cb = colorbar();
+title(cb, "Time in Seconds");
 
 
 %Key finding!!: the weird values in the throttle vs. power graph are

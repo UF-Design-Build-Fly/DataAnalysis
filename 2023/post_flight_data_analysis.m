@@ -6,7 +6,7 @@ load(flight1);
 load(flight2);
 load(flight3);
 
-array = table2array(flight3_2ft_antenna_crash);
+array = table2array(flight2_1ft_antenna);
 columnNum = size(array,2);
 
 voltage_raw = array(:,1);
