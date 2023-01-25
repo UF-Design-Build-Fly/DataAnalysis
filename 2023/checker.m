@@ -43,15 +43,16 @@ densityOfAir = 1.24257; %kg/m^2 on January 14th, 2023
 % rearranged to solve for velocity)
 airspeed = sqrt((2*airspeed_diff*1000)/densityOfAir);
 
-voltage = rescale(voltage, 0, 10); %Scale all data to be within the same range for easy comparison (and possible future statistical analysis)
-current = rescale(current, 0, 10);
-throttle = rescale(throttle, 0, 10);
-airspeed = rescale(airspeed, 0, 10);
 
 disp('Max Current (A)');
 disp(max(current));
 disp('Max Airspeed (m/s)')
 disp(max(airspeed));
+
+voltage = rescale(voltage, 0, 10); %Scale all data to be within the same range for easy comparison (and possible future statistical analysis)
+current = rescale(current, 0, 10);
+throttle = rescale(throttle, 0, 10);
+airspeed = rescale(airspeed, 0, 10);
 
 x = throttle(~isnan(throttle)); %remove any NaN values from the data
 y = airspeed(~isnan(airspeed));
