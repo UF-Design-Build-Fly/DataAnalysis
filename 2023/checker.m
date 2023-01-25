@@ -15,11 +15,7 @@ voltage_raw = array(:,1);
 current_raw = array(:,2);
 airspeed_raw = array(:,3);
 time = array(:,4)/1000; % transfer from ms to seconds
-
-% if flight data has throttle data
-if (columnNum > 4)
-   throttle = array(:,5);  
-end
+throttle = array(:,5);  %Code now only works on flights with throttle data
 
 % translate voltage from 10-bit value to voltage
 voltage = (((voltage_raw/1023)*5)/0.06369427);
@@ -47,178 +43,29 @@ densityOfAir = 1.24257; %kg/m^2 on January 14th, 2023
 % rearranged to solve for velocity)
 airspeed = sqrt((2*airspeed_diff*1000)/densityOfAir);
 
-%a= 1;
-%b = [1/4 1/4 1/4 1/4]; % moving average filter
-%voltage_filt = filter(b,a,voltage);
-
-
-
-%
-% FLIGHT DATA WITH THROTTLE DATA
-%
-
-voltage = rescale(voltage, 0, 10);
+voltage = rescale(voltage, 0, 10); %Scale all data to be within the same range for easy comparison (and possible future statistical analysis)
 current = rescale(current, 0, 10);
 throttle = rescale(throttle, 0, 10);
 airspeed = rescale(airspeed, 0, 10);
-
-%current = [diff(current); 0];
-%throttle = [diff(throttle); 0];
-
-if (columnNum > 4)
-        %voltage vs current
-    subplot(2,2,1);
-    yyaxis left
-    plot(time, voltage, 'Color', 'blue');
-    hold on;
-    yyaxis right
-    plot(time, current, 'Color', 'red');
-    hold off;
-    
-    yyaxis left
-    xlabel('Time (s)');
-    ylabel('Voltage (V)');
-    title('Voltage vs Current');
-    legend('voltage', 'current');
-    ylim([0 10]) % good voltage range
-    
-    yyaxis right
-    ylabel('Current (A)');
-    ylim([0 10]) % good current range
-    
-    %airspeed vs current
-    subplot(2,2,2);
-    yyaxis left
-    plot(time, airspeed, 'Color', 'magenta');
-    hold on;
-    yyaxis right
-    plot(time, current, 'Color', 'red');
-    hold off;
-    
-    yyaxis left
-    xlabel('Time (s)');
-    ylabel('Airspeed (m/s)');
-    title('Airspeed vs Current');
-    legend('airspeed', 'current');
-    ylim([0 10]) %good airspeed range
-    
-    yyaxis right
-    ylabel('Current (A)');
-    ylim([0 10]) % good current range
-
-    %throttle vs current
-    subplot(2,2,[3 4]);
-    yyaxis left
-    plot(time, throttle, 'Color', 'green');
-    hold on;
-    yyaxis right
-    plot(time, current, 'Color', 'red');
-    hold off;
-    
-    yyaxis left
-    xlabel('Time (s)');
-    ylabel('throttle');
-    title('Throttle vs Current');
-    legend('throttle', 'current');
-    ylim([0 10]) %throttle range; 900 to 2100 us
-    
-    yyaxis right
-    ylabel('Current (A)');
-    ylim([0 10]) % good current range
-    
-%
-% FLIGHT DATA WITHOUT THROTTLE DATA
-%
-else
-    %voltage vs current
-    subplot(1,2,1);
-    yyaxis left
-    plot(time, voltage, 'Color', 'blue');
-    hold on;
-    yyaxis right
-    plot(time, current, 'Color', 'red');
-    hold off;
-    
-    yyaxis left
-    xlabel('Time (s)');
-    ylabel('Voltage (V)');
-    title('Voltage vs Current');
-    legend('voltage', 'current');
-    ylim([18 30]) % good voltage range
-    
-    yyaxis right
-    ylabel('Current (A)');
-    ylim([0 70]) % good current range
-    
-    %airspeed vs current
-    subplot(1,2,2);
-    yyaxis left
-    plot(time, airspeed, 'Color', 'magenta');
-    hold on;
-    yyaxis right
-    plot(time, current, 'Color', 'red');
-    hold off;
-    
-    yyaxis left
-    xlabel('Time (s)');
-    ylabel('Airspeed (m/s)');
-    title('Airspeed vs Current');
-    legend('airspeed', 'current');
-    ylim([0 45]) %good airspeed range
-    
-    yyaxis right
-    ylabel('Current (A)');
-    ylim([0 70]) % good current range
-end
 
 disp('Max Current (A)');
 disp(max(current));
 disp('Max Airspeed (m/s)')
 disp(max(airspeed));
 
-
-%GOOD PLOT with all values scaled:
-close all;
-
-
-% xlin = linspace(min(throttle), max(throttle), length(throttle))';
-% ylin = linspace(min(airspeed), max(airspeed), length(airspeed))';
-% [X, Y] = meshgrid(xlin, ylin);
-% f = scatteredInterpolant(X, Y, current);
-% Z = f(X, Y);
-% 
-% figure;
-% mesh(X,Y,Z);
-
-
-x = throttle(~isnan(throttle));
+x = throttle(~isnan(throttle)); %remove any NaN values from the data
 y = airspeed(~isnan(airspeed));
 z = current(~isnan(current));
 time = time(~isnan(current));
 
-scatter3(throttle, airspeed, current.*voltage); %this chart shows how power input falls as airspeed increases. This is because the propeller is no longer able to output significant thrust as it is rpm limited, so angle of attack is approaching zero.
+markerSize = 10;
+colormap("jet")
+
+scatter3(throttle, airspeed, current.*voltage, markerSize, [time; 0], 'filled'); %this chart shows how power input falls as airspeed increases. This is because the propeller is no longer able to output significant thrust as it is rpm limited, so angle of attack is approaching zero.
 xlabel("throttle")
 ylabel("airspeed")
 zlabel("power")
-% 
-% xlin = linspace(min(x),max(x),33);
-% ylin = linspace(min(y),max(y),33);
-% 
-% [X,Y] = meshgrid(xlin,ylin);
-% 
-% f = scatteredInterpolant(x,y,z);
-% Z = f(X,Y);
-% 
-% 
-% figure
-% surf(X,Y,Z) %interpolated
-% colormap([time./max(time), time./max(time), time./max(time)]);
-% 
-% % surf(throttle, airspeed, current)
-% colormap("turbo");
-% xlabel("throttle")
-% ylabel("airspeed")
-% zlabel("Current")
+colorbar
 
 
 %Key finding!!: the weird values in the throttle vs. power graph are
